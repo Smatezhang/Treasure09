@@ -1,6 +1,9 @@
 package com.example.machenike.treasure9.login;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -11,17 +14,20 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.machenike.treasure9.MainActivity;
 import com.example.machenike.treasure9.R;
+import com.example.machenike.treasure9.User;
 import com.example.machenike.treasure9.commons.ActivityUtils;
 import com.example.machenike.treasure9.commons.RegexUtils;
 import com.example.machenike.treasure9.custom.AlertDialogFragment;
+import com.example.machenike.treasure9.map.HomeActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements LoginView{
 
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -35,6 +41,7 @@ public class LoginActivity extends AppCompatActivity {
     Button mBtnLogin;
     private Unbinder mUnbinder;
     private ActivityUtils mActivityUtils;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,8 +99,7 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // TODO: 2017/7/31
-        mActivityUtils.showToast("登陆成功");
+        new LoginPresenter(this).login(new User(mUserName,mPassWord));
     }
 
     //返回箭头的点击
@@ -112,5 +118,28 @@ public class LoginActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mUnbinder.unbind();
+    }
+//------------------------------实现自视图接口的方法--------------------------
+    @Override
+    public void showProgress() {
+        mProgressDialog = ProgressDialog.show(LoginActivity.this, "登录", "正在登陆中，请稍候......");
+    }
+
+    @Override
+    public void hideProgress() {
+        mProgressDialog.dismiss();
+    }
+
+    @Override
+    public void showMessage(String message) {
+        mActivityUtils.showToast(message);
+    }
+
+    @Override
+    public void navigateToHomeActivity() {
+        mActivityUtils.startActivity(HomeActivity.class);
+        finish();
+
+        LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(new Intent(MainActivity.ACTION_MAIN));
     }
 }
