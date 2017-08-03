@@ -130,6 +130,7 @@
         <!--用来显示宝藏信息的fragment-->
         <!--android:visibility="gone"-->
 
+
         <FrameLayout
             android:id="@+id/layout_bottom"
             android:layout_width="match_parent"
