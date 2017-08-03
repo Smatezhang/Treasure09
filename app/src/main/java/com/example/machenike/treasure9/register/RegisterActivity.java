@@ -1,5 +1,6 @@
 package com.example.machenike.treasure9.register;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -11,15 +12,17 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.machenike.treasure9.R;
+import com.example.machenike.treasure9.User;
 import com.example.machenike.treasure9.commons.ActivityUtils;
 import com.example.machenike.treasure9.commons.RegexUtils;
 import com.example.machenike.treasure9.custom.AlertDialogFragment;
+import com.example.machenike.treasure9.map.HomeActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterActivity extends AppCompatActivity implements RegisterView{
 
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -32,6 +35,7 @@ public class RegisterActivity extends AppCompatActivity {
     @BindView(R.id.btn_Register)
     Button mBtnRegister;
     private ActivityUtils mActivityUtils;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +111,26 @@ public class RegisterActivity extends AppCompatActivity {
                     .show(getSupportFragmentManager(),"password_error");
             return;
         }
-        // TODO: 2017/7/31
-        mActivityUtils.showToast("注册成功！");
+        new RegisterPresenter(this).register(new User(mUserName,mPassWord));
+    }
+//---------------------------实现自视图接口的方法------------------------
+    @Override
+    public void showProgress() {
+        mProgressDialog = ProgressDialog.show(this, "注册", "正在注册中，请稍候....");
+    }
+
+    @Override
+    public void hideProgress() {
+        mProgressDialog.dismiss();
+    }
+
+    @Override
+    public void showMessage(String message) {
+        mActivityUtils.showToast(message);
+    }
+
+    @Override
+    public void NavigateToHomeActivity() {
+        mActivityUtils.startActivity(HomeActivity.class);
     }
 }

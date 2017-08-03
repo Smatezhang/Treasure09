@@ -2,6 +2,7 @@ package com.example.machenike.treasure9.net;
 
 import com.example.machenike.treasure9.User;
 import com.example.machenike.treasure9.login.UserResult;
+import com.example.machenike.treasure9.register.RegisterResult;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -17,4 +18,7 @@ public interface NetRequest {
     //登陆
     @POST("/Handler/UserHandler.ashx?action=login")
     Call<UserResult> login(@Body User user);
+
+    @POST("/Handler/UserHandler.ashx?action=register")
+    Call<RegisterResult> register(@Body User user);
 }

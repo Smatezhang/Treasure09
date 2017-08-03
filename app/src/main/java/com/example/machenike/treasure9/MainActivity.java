@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +13,7 @@ import android.widget.Button;
 
 import com.example.machenike.treasure9.commons.ActivityUtils;
 import com.example.machenike.treasure9.login.LoginActivity;
+import com.example.machenike.treasure9.map.HomeActivity;
 import com.example.machenike.treasure9.register.RegisterActivity;
 
 import butterknife.BindView;
@@ -43,6 +45,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mUnbinder = ButterKnife.bind(this);
         mActivityUtils = new ActivityUtils(this);
+        //判断是否是第一次登陆，若已登陆过了就直接跳转到HomeActivity
+       /* SharedPreferences user_info = getSharedPreferences("user_info", MODE_PRIVATE);
+        if (user_info.getInt("key_tokenid",0)==UserPrefs.getInstance().getTokenid()){
+            mActivityUtils.startActivity(HomeActivity.class);
+            finish();
+            return;
+        }*/
         IntentFilter intentFilter = new IntentFilter(ACTION_MAIN);
         LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(mBroadcastReceiver,intentFilter);
     }
