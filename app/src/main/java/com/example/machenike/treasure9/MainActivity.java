@@ -46,12 +46,12 @@ public class MainActivity extends AppCompatActivity {
         mUnbinder = ButterKnife.bind(this);
         mActivityUtils = new ActivityUtils(this);
         //判断是否是第一次登陆，若已登陆过了就直接跳转到HomeActivity
-       /* SharedPreferences user_info = getSharedPreferences("user_info", MODE_PRIVATE);
+        SharedPreferences user_info = getSharedPreferences("user_info", MODE_PRIVATE);
         if (user_info.getInt("key_tokenid",0)==UserPrefs.getInstance().getTokenid()){
             mActivityUtils.startActivity(HomeActivity.class);
             finish();
             return;
-        }*/
+        }
         IntentFilter intentFilter = new IntentFilter(ACTION_MAIN);
         LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(mBroadcastReceiver,intentFilter);
     }
