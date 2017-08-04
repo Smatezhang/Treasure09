@@ -15,13 +15,16 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BaiduMapOptions;
 import com.baidu.mapapi.map.MapStatus;
+import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.example.machenike.treasure9.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 
 /**
@@ -60,6 +63,7 @@ public class MapFragment extends Fragment {
     @BindView(R.id.map_frame)
     FrameLayout mMapFrame;
     Unbinder unbinder;
+    private BaiduMap mBaiduMap;
 
     @Nullable
     @Override
@@ -93,8 +97,49 @@ public class MapFragment extends Fragment {
         //创建MapView对象
         MapView mapView = new MapView(getContext(), options);
 
+        mBaiduMap = mapView.getMap();
+
         //将MapView填充到FrameLayout
         mMapFrame.addView(mapView,0);
+    }
+
+    //--------------------------------给地图上的控件添加点击事件------------------------
+    //点击定位
+    @OnClick({R.id.tv_located})
+    public void moveToLocation(){
+        // TODO: 2017/8/4
+    }
+    //切换地图类型
+    @OnClick({R.id.tv_satellite})
+    public void switchMapType(){
+        //获取当前的地图类型
+        int mapType = mBaiduMap.getMapType();
+        //根据当前地图类型决定接下来要切换的地图类型
+        mapType=mapType==BaiduMap.MAP_TYPE_NORMAL?BaiduMap.MAP_TYPE_SATELLITE:BaiduMap.MAP_TYPE_NORMAL;
+        String msg = mapType==BaiduMap.MAP_TYPE_NORMAL?"卫星":"普通";
+
+        mBaiduMap.setMapType(mapType);
+        mTvSatellite.setText(msg);
+    }
+    //指南针
+    @OnClick({R.id.tv_compass})
+    public void compass(){
+        boolean compassEnabled = mBaiduMap.getUiSettings().isCompassEnabled();
+        mBaiduMap.getUiSettings().setCompassEnabled(!compassEnabled);
+    }
+    //地图放大缩小按钮
+    @OnClick({R.id.iv_scaleUp,R.id.iv_scaleDown})
+    public void switchMapScale(View view){
+        switch (view.getId()){
+            case R.id.iv_scaleUp:
+                //放大
+                mBaiduMap.setMapStatus(MapStatusUpdateFactory.zoomIn());
+                break;
+            case R.id.iv_scaleDown:
+                //缩小
+                mBaiduMap.setMapStatus(MapStatusUpdateFactory.zoomOut());
+                break;
+        }
     }
 
     @Override
