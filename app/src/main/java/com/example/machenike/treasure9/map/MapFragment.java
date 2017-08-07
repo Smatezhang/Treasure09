@@ -25,6 +25,8 @@ import com.baidu.mapapi.map.BaiduMapOptions;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.MyLocationData;
+import com.baidu.mapapi.model.LatLng;
 import com.example.machenike.treasure9.R;
 
 import butterknife.BindView;
@@ -69,6 +71,8 @@ public class MapFragment extends Fragment {
     FrameLayout mMapFrame;
     Unbinder unbinder;
     private BaiduMap mBaiduMap;
+    private LatLng mCurrentLocation;
+    private boolean isFirst = true;
 
     @Nullable
     @Override
@@ -111,14 +115,32 @@ public class MapFragment extends Fragment {
     }
 
     private BDLocationListener mBDLocationListener = new BDLocationListener() {
+
+
+
         //获得位置后执行
         @Override
         public void onReceiveLocation(BDLocation bdLocation) {
             double latitude = bdLocation.getLatitude();//纬度
             double longitude = bdLocation.getLongitude();//经度
 
+            mCurrentLocation = new LatLng(latitude, longitude);
             String addrStr = bdLocation.getAddrStr();//位置描述
             Log.e("TAG","当前位于:"+addrStr+"经纬度是"+longitude+":"+latitude);
+
+
+            MyLocationData myLocationData = new MyLocationData.Builder()
+                    .accuracy(100f)//精度
+                    .latitude(latitude)
+                    .longitude(longitude)
+                    .build();
+            mBaiduMap.setMyLocationData(myLocationData);
+
+            if (isFirst){
+                moveToLocation();
+                isFirst = false;
+            }
+
         }
     };
 
@@ -148,7 +170,12 @@ public class MapFragment extends Fragment {
     //点击定位
     @OnClick({R.id.tv_located})
     public void moveToLocation(){
-        // TODO: 2017/8/4
+
+        MapStatus mapStatus = new MapStatus.Builder()
+                .zoom(19)
+                .target(mCurrentLocation)
+                .build();
+        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(mapStatus));
     }
     //切换地图类型
     @OnClick({R.id.tv_satellite})
