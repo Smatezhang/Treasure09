@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,10 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.baidu.location.BDLocation;
+import com.baidu.location.BDLocationListener;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BaiduMapOptions;
 import com.baidu.mapapi.map.MapStatus;
@@ -78,8 +83,44 @@ public class MapFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         unbinder = ButterKnife.bind(this, view);
+        //初始化地图相关
         initView();
+        //初始化位置相关
+        initLocation();
     }
+    //初始化位置相关
+    private void initLocation() {
+        //激活百度地图图层的定位功能
+        mBaiduMap.setMyLocationEnabled(true);
+        //第一步，初始化LocationClient类
+        LocationClient locationClient = new LocationClient(getContext().getApplicationContext());
+        //第二步，配置定位SDK参数
+        LocationClientOption option = new LocationClientOption();
+        option.setCoorType("bd09ll"); //设置默认坐标系，默认GCJ02，误差大
+        option.setIsNeedAddress(true);//可选，设置是否需要地址信息，默认不需要
+        option.setOpenGps(true);//可选，默认false,设置是否使用gps
+        locationClient.setLocOption(option);
+
+        //第三步，注册位置监听
+        locationClient.registerLocationListener(mBDLocationListener);
+
+        //第四补，开启定位
+        locationClient.start();
+
+
+    }
+
+    private BDLocationListener mBDLocationListener = new BDLocationListener() {
+        //获得位置后执行
+        @Override
+        public void onReceiveLocation(BDLocation bdLocation) {
+            double latitude = bdLocation.getLatitude();//纬度
+            double longitude = bdLocation.getLongitude();//经度
+
+            String addrStr = bdLocation.getAddrStr();//位置描述
+            Log.e("TAG","当前位于:"+addrStr+"经纬度是"+longitude+":"+latitude);
+        }
+    };
 
     private void initView() {
 
