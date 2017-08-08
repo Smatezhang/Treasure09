@@ -29,9 +29,11 @@ import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BaiduMapOptions;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.map.InfoWindow;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
@@ -91,6 +93,8 @@ public class MapFragment extends Fragment implements MapFragmentView{
     private LatLng mCurrentStatus;
     private ActivityUtils mActivityUtils;
     private BitmapDescriptor treasure_dot;
+    private Marker mCurrentMarker;
+    private BitmapDescriptor treasure_expand;
 
     @Nullable
     @Override
@@ -168,6 +172,7 @@ public class MapFragment extends Fragment implements MapFragmentView{
 
     private void initView() {
         treasure_dot = BitmapDescriptorFactory.fromResource(R.mipmap.treasure_dot);
+        treasure_expand = BitmapDescriptorFactory.fromResource(R.mipmap.treasure_expanded);
 
         MapStatus mapStatus = new MapStatus.Builder()
                 .overlook(0f)
@@ -190,8 +195,33 @@ public class MapFragment extends Fragment implements MapFragmentView{
 
         //设置地图状态改变监听
         mBaiduMap.setOnMapStatusChangeListener(mOnMapStatusChangeListener);
+
+        //设置地图覆盖物的点击监听
+        mBaiduMap.setOnMarkerClickListener(mOnMarkerClickListener);
     }
-    
+
+    private BaiduMap.OnMarkerClickListener mOnMarkerClickListener = new BaiduMap.OnMarkerClickListener() {
+        @Override
+        public boolean onMarkerClick(Marker marker) {  //一点击地图覆盖物就会触发该方法
+
+            if (mCurrentMarker!=null){  //意味着肯定有一个Marker被点击过
+                mCurrentMarker.setVisible(true);
+            }
+            mCurrentMarker = marker;
+            mCurrentMarker.setVisible(false);
+            InfoWindow infoWindow = new InfoWindow(treasure_expand, marker.getPosition(), 0, new InfoWindow.OnInfoWindowClickListener() {
+                @Override
+                public void onInfoWindowClick() {
+                    mBaiduMap.hideInfoWindow();
+                    mCurrentMarker.setVisible(true);
+                }
+            });
+            mBaiduMap.showInfoWindow(infoWindow);
+
+            return false;
+        }
+    };
+    //设置地图状态改变监听
     private BaiduMap.OnMapStatusChangeListener mOnMapStatusChangeListener = new BaiduMap.OnMapStatusChangeListener() {
         @Override
         public void onMapStatusChangeStart(MapStatus mapStatus) {
