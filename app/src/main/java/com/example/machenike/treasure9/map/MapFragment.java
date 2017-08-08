@@ -27,9 +27,12 @@ import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BaiduMapOptions;
+import com.baidu.mapapi.map.BitmapDescriptor;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
 import com.example.machenike.treasure9.R;
@@ -87,6 +90,7 @@ public class MapFragment extends Fragment implements MapFragmentView{
     private LocationClient mLocationClient;
     private LatLng mCurrentStatus;
     private ActivityUtils mActivityUtils;
+    private BitmapDescriptor treasure_dot;
 
     @Nullable
     @Override
@@ -99,6 +103,7 @@ public class MapFragment extends Fragment implements MapFragmentView{
 
         return view;
     }
+
 
     //当onCreateView执行完毕之后执行
     @Override
@@ -162,6 +167,7 @@ public class MapFragment extends Fragment implements MapFragmentView{
     };
 
     private void initView() {
+        treasure_dot = BitmapDescriptorFactory.fromResource(R.mipmap.treasure_dot);
 
         MapStatus mapStatus = new MapStatus.Builder()
                 .overlook(0f)
@@ -297,7 +303,22 @@ public class MapFragment extends Fragment implements MapFragmentView{
 
     @Override
     public void setTreasureData(List<Treasure> treasureList) {
-        // TODO: 2017/8/7
+        //先清除掉已有的marker
+        mBaiduMap.clear();
         Log.e("TAG",treasureList.size()+"");
+
+        for (Treasure mTreasure:
+                treasureList) {
+            Bundle bundle = new Bundle();
+            bundle.putInt("treasure_id",mTreasure.getId());
+
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.anchor(0.5f,0.5f);
+            markerOptions.extraInfo(bundle);
+            markerOptions.icon(treasure_dot);
+            markerOptions.position(new LatLng(mTreasure.getLatitude(),mTreasure.getLongitude()));
+            mBaiduMap.addOverlay(markerOptions);
+        }
+
     }
 }
