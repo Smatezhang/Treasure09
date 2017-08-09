@@ -3,6 +3,8 @@ package com.example.machenike.treasure9.map;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -36,6 +38,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private Unbinder mUnbinder;
     private ActivityUtils mActivityUtils;
     private ImageView mUserIcon;
+    private MapFragment mMapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +47,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
         mUnbinder = ButterKnife.bind(this);
         mActivityUtils = new ActivityUtils(this);
+
+        FragmentManager manager = getSupportFragmentManager();
+        mMapFragment = (MapFragment) manager.findFragmentById(R.id.mapFragment);
 
         setSupportActionBar(mToolbar);
         if (getSupportActionBar()!=null){
@@ -86,7 +92,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.menu_hide:
-                mActivityUtils.showToast("埋藏宝藏");
+                mMapFragment.changeUiMode(2);
                 break;
             case R.id.menu_my_list:
                 mActivityUtils.showToast("我的列表");

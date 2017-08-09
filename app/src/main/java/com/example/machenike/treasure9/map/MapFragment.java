@@ -92,6 +92,8 @@ public class MapFragment extends Fragment implements MapFragmentView {
     Unbinder unbinder;
     @BindView(R.id.treasureView)
     TreasureView mTreasureView;
+    @BindView(R.id.hide_treasure)
+    RelativeLayout mHideTreasure;
     private BaiduMap mBaiduMap;
     private static LatLng mCurrentLocation;
     private boolean isFirst = true;
@@ -101,6 +103,7 @@ public class MapFragment extends Fragment implements MapFragmentView {
     private BitmapDescriptor treasure_dot;
     private Marker mCurrentMarker;
     private BitmapDescriptor treasure_expand;
+    private InfoWindow mInfoWindow;
 
     @Nullable
     @Override
@@ -126,7 +129,51 @@ public class MapFragment extends Fragment implements MapFragmentView {
         //初始化位置相关
         initLocation();
     }
+    private static final int TREASURE_MODE_NORMAL = 0;
+    private static final int TREASURE_MODE_SELECTED = 1;
+    private static final int TREASURE_MODE_HIDE = 2;
 
+    private int TREASURE_MODE_CURRENT = TREASURE_MODE_NORMAL;
+
+    public void changeUiMode(int mode){
+        if (mode ==TREASURE_MODE_CURRENT)
+            return;
+        TREASURE_MODE_CURRENT = mode;
+        switch (mode){
+            case TREASURE_MODE_NORMAL://切换到普通视图
+                if (mCurrentMarker!=null){
+                    mCurrentMarker.setVisible(true);
+                }
+                mBaiduMap.hideInfoWindow();
+                mLayoutBottom.setVisibility(View.GONE);
+                mTreasureView.setVisibility(View.GONE);
+                mCenterLayout.setVisibility(View.INVISIBLE);
+                break;
+            case TREASURE_MODE_SELECTED://切换到宝藏被选中视图
+                mLayoutBottom.setVisibility(View.VISIBLE);
+                mTreasureView.setVisibility(View.VISIBLE);
+                mCenterLayout.setVisibility(View.INVISIBLE);
+                mBaiduMap.showInfoWindow(mInfoWindow);
+                break;
+            case TREASURE_MODE_HIDE://切换到埋藏宝藏视图
+                if (mCurrentMarker!=null){
+                    mCurrentMarker.setVisible(true);
+                }
+                mCenterLayout.setVisibility(View.VISIBLE);
+                mLayoutBottom.setVisibility(View.GONE);
+                mTreasureView.setVisibility(View.GONE);
+                mBtnHideHere.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mLayoutBottom.setVisibility(View.VISIBLE);
+                        mTreasureView.setVisibility(View.GONE);
+                        mHideTreasure.setVisibility(View.VISIBLE);
+                    }
+                });
+                break;
+        }
+
+    }
     //初始化位置相关
     private void initLocation() {
         //激活百度地图图层的定位功能
@@ -161,6 +208,7 @@ public class MapFragment extends Fragment implements MapFragmentView {
             String addrStr = bdLocation.getAddrStr();//位置描述
             Log.e("TAG", "当前位于:" + addrStr + "经纬度是" + longitude + ":" + latitude);
 
+            updateView(mCurrentLocation);
 
             MyLocationData myLocationData = new MyLocationData.Builder()
                     .accuracy(100f)//精度
@@ -205,6 +253,7 @@ public class MapFragment extends Fragment implements MapFragmentView {
 
         //设置地图覆盖物的点击监听
         mBaiduMap.setOnMarkerClickListener(mOnMarkerClickListener);
+
     }
 
     private BaiduMap.OnMarkerClickListener mOnMarkerClickListener = new BaiduMap.OnMarkerClickListener() {
@@ -217,24 +266,25 @@ public class MapFragment extends Fragment implements MapFragmentView {
             }
             mCurrentMarker = marker;
             mCurrentMarker.setVisible(false);
-            InfoWindow infoWindow = new InfoWindow(treasure_expand, marker.getPosition(), 0, new InfoWindow.OnInfoWindowClickListener() {
+            mInfoWindow = new InfoWindow(treasure_expand, marker.getPosition(), 0, new InfoWindow.OnInfoWindowClickListener() {
                 @Override
                 public void onInfoWindowClick() {
-                    mBaiduMap.hideInfoWindow();
+                    /*mBaiduMap.hideInfoWindow();
                     mCurrentMarker.setVisible(true);
 
                     mLayoutBottom.setVisibility(View.GONE);
-                    mTreasureView.setVisibility(View.GONE);
+                    mTreasureView.setVisibility(View.GONE);*/
+                    changeUiMode(TREASURE_MODE_NORMAL);
                 }
             });
-            mBaiduMap.showInfoWindow(infoWindow);
+           // mBaiduMap.showInfoWindow(mInfoWindow);
             Bundle bundle = marker.getExtraInfo();
             int treasure_id = bundle.getInt("treasure_id");
             Treasure treasure = TreasureRepo.getInstance().getTreasure(treasure_id);
             mTreasureView.bindView(treasure);
-            mLayoutBottom.setVisibility(View.VISIBLE);
-            mTreasureView.setVisibility(View.VISIBLE);
-
+          //  mLayoutBottom.setVisibility(View.VISIBLE);
+           // mTreasureView.setVisibility(View.VISIBLE);
+            changeUiMode(TREASURE_MODE_SELECTED);
             return false;
         }
     };
