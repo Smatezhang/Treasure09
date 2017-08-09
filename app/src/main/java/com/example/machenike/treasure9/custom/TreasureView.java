@@ -56,6 +56,7 @@ public class TreasureView extends RelativeLayout {
     //在XML中使用，指定Style
     public TreasureView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+
         init();
     }
 

@@ -234,6 +234,7 @@ public class MapFragment extends Fragment implements MapFragmentView {
             mTreasureView.bindView(treasure);
             mLayoutBottom.setVisibility(View.VISIBLE);
             mTreasureView.setVisibility(View.VISIBLE);
+
             return false;
         }
     };
