@@ -2,9 +2,11 @@ package com.example.machenike.treasure9.map;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
@@ -39,8 +41,10 @@ import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
 import com.example.machenike.treasure9.R;
 import com.example.machenike.treasure9.commons.ActivityUtils;
+import com.example.machenike.treasure9.custom.TreasureView;
 import com.example.machenike.treasure9.treasure.Area;
 import com.example.machenike.treasure9.treasure.Treasure;
+import com.example.machenike.treasure9.treasure.TreasureRepo;
 
 import java.util.List;
 
@@ -53,7 +57,7 @@ import butterknife.Unbinder;
  * Created by MACHENIKE on 2017/8/3.
  */
 
-public class MapFragment extends Fragment implements MapFragmentView{
+public class MapFragment extends Fragment implements MapFragmentView {
     private static final int REQUSET_CODE = 100;
     @BindView(R.id.iv_located)
     ImageView mIvLocated;
@@ -86,8 +90,10 @@ public class MapFragment extends Fragment implements MapFragmentView{
     @BindView(R.id.map_frame)
     FrameLayout mMapFrame;
     Unbinder unbinder;
+    @BindView(R.id.treasureView)
+    TreasureView mTreasureView;
     private BaiduMap mBaiduMap;
-    private LatLng mCurrentLocation;
+    private static LatLng mCurrentLocation;
     private boolean isFirst = true;
     private LocationClient mLocationClient;
     private LatLng mCurrentStatus;
@@ -101,8 +107,8 @@ public class MapFragment extends Fragment implements MapFragmentView{
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, null);
 
-        if (ContextCompat.checkSelfPermission(getContext(),Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
-            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},REQUSET_CODE);
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUSET_CODE);
         }
 
         return view;
@@ -120,6 +126,7 @@ public class MapFragment extends Fragment implements MapFragmentView{
         //初始化位置相关
         initLocation();
     }
+
     //初始化位置相关
     private void initLocation() {
         //激活百度地图图层的定位功能
@@ -152,7 +159,7 @@ public class MapFragment extends Fragment implements MapFragmentView{
 
             mCurrentLocation = new LatLng(latitude, longitude);
             String addrStr = bdLocation.getAddrStr();//位置描述
-            Log.e("TAG","当前位于:"+addrStr+"经纬度是"+longitude+":"+latitude);
+            Log.e("TAG", "当前位于:" + addrStr + "经纬度是" + longitude + ":" + latitude);
 
 
             MyLocationData myLocationData = new MyLocationData.Builder()
@@ -162,7 +169,7 @@ public class MapFragment extends Fragment implements MapFragmentView{
                     .build();
             mBaiduMap.setMyLocationData(myLocationData);
 
-            if (isFirst){
+            if (isFirst) {
                 moveToLocation();
                 isFirst = false;
             }
@@ -191,7 +198,7 @@ public class MapFragment extends Fragment implements MapFragmentView{
         mBaiduMap = mapView.getMap();
 
         //将MapView填充到FrameLayout
-        mMapFrame.addView(mapView,0);
+        mMapFrame.addView(mapView, 0);
 
         //设置地图状态改变监听
         mBaiduMap.setOnMapStatusChangeListener(mOnMapStatusChangeListener);
@@ -201,10 +208,11 @@ public class MapFragment extends Fragment implements MapFragmentView{
     }
 
     private BaiduMap.OnMarkerClickListener mOnMarkerClickListener = new BaiduMap.OnMarkerClickListener() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public boolean onMarkerClick(Marker marker) {  //一点击地图覆盖物就会触发该方法
 
-            if (mCurrentMarker!=null){  //意味着肯定有一个Marker被点击过
+            if (mCurrentMarker != null) {  //意味着肯定有一个Marker被点击过
                 mCurrentMarker.setVisible(true);
             }
             mCurrentMarker = marker;
@@ -214,10 +222,18 @@ public class MapFragment extends Fragment implements MapFragmentView{
                 public void onInfoWindowClick() {
                     mBaiduMap.hideInfoWindow();
                     mCurrentMarker.setVisible(true);
+
+                    mLayoutBottom.setVisibility(View.GONE);
+                    mTreasureView.setVisibility(View.GONE);
                 }
             });
             mBaiduMap.showInfoWindow(infoWindow);
-
+            Bundle bundle = marker.getExtraInfo();
+            int treasure_id = bundle.getInt("treasure_id");
+            Treasure treasure = TreasureRepo.getInstance().getTreasure(treasure_id);
+            mTreasureView.bindView(treasure);
+            mLayoutBottom.setVisibility(View.VISIBLE);
+            mTreasureView.setVisibility(View.VISIBLE);
             return false;
         }
     };
@@ -225,7 +241,7 @@ public class MapFragment extends Fragment implements MapFragmentView{
     private BaiduMap.OnMapStatusChangeListener mOnMapStatusChangeListener = new BaiduMap.OnMapStatusChangeListener() {
         @Override
         public void onMapStatusChangeStart(MapStatus mapStatus) {
-            
+
         }
 
         @Override
@@ -238,16 +254,17 @@ public class MapFragment extends Fragment implements MapFragmentView{
             //地图状态改变之后
             //获取地图状态改变之后的位置
             LatLng target = mapStatus.target;
-            if (target!=mCurrentStatus){
+            if (target != mCurrentStatus) {
                 //此时认为地图状态真的改变了
                 updateView(target);
 
                 mCurrentStatus = target;
-                
+
             }
         }
     };
-        //拿到宝藏
+
+    //拿到宝藏
     private void updateView(LatLng mapStatus) {
 
         double latitude = mapStatus.latitude;//纬度
@@ -260,13 +277,13 @@ public class MapFragment extends Fragment implements MapFragmentView{
         area.setMinLng(Math.floor(longitude));
 
         new MapFragmentPresenter(this).getTreasureInArea(area);
-        
+
     }
 
     //--------------------------------给地图上的控件添加点击事件------------------------
     //点击定位
     @OnClick({R.id.tv_located})
-    public void moveToLocation(){
+    public void moveToLocation() {
 
         MapStatus mapStatus = new MapStatus.Builder()
                 .zoom(19)
@@ -274,28 +291,31 @@ public class MapFragment extends Fragment implements MapFragmentView{
                 .build();
         mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(mapStatus));
     }
+
     //切换地图类型
     @OnClick({R.id.tv_satellite})
-    public void switchMapType(){
+    public void switchMapType() {
         //获取当前的地图类型
         int mapType = mBaiduMap.getMapType();
         //根据当前地图类型决定接下来要切换的地图类型
-        mapType=mapType==BaiduMap.MAP_TYPE_NORMAL?BaiduMap.MAP_TYPE_SATELLITE:BaiduMap.MAP_TYPE_NORMAL;
-        String msg = mapType==BaiduMap.MAP_TYPE_NORMAL?"卫星":"普通";
+        mapType = mapType == BaiduMap.MAP_TYPE_NORMAL ? BaiduMap.MAP_TYPE_SATELLITE : BaiduMap.MAP_TYPE_NORMAL;
+        String msg = mapType == BaiduMap.MAP_TYPE_NORMAL ? "卫星" : "普通";
 
         mBaiduMap.setMapType(mapType);
         mTvSatellite.setText(msg);
     }
+
     //指南针
     @OnClick({R.id.tv_compass})
-    public void compass(){
+    public void compass() {
         boolean compassEnabled = mBaiduMap.getUiSettings().isCompassEnabled();
         mBaiduMap.getUiSettings().setCompassEnabled(!compassEnabled);
     }
+
     //地图放大缩小按钮
-    @OnClick({R.id.iv_scaleUp,R.id.iv_scaleDown})
-    public void switchMapScale(View view){
-        switch (view.getId()){
+    @OnClick({R.id.iv_scaleUp, R.id.iv_scaleDown})
+    public void switchMapScale(View view) {
+        switch (view.getId()) {
             case R.id.iv_scaleUp:
                 //放大
                 mBaiduMap.setMapStatus(MapStatusUpdateFactory.zoomIn());
@@ -310,12 +330,12 @@ public class MapFragment extends Fragment implements MapFragmentView{
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode){
+        switch (requestCode) {
             case REQUSET_CODE:
-                if (grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     mLocationClient.requestLocation();
                 } else {
-                    Toast.makeText(getContext(),"权限不足",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "权限不足", Toast.LENGTH_SHORT).show();
                 }
         }
     }
@@ -325,7 +345,8 @@ public class MapFragment extends Fragment implements MapFragmentView{
         super.onDestroyView();
         unbinder.unbind();
     }
-//--------------------------实现自视图接口的方法------------------------
+
+    //--------------------------实现自视图接口的方法------------------------
     @Override
     public void showMessage(String message) {
         mActivityUtils.showToast(message);
@@ -335,20 +356,24 @@ public class MapFragment extends Fragment implements MapFragmentView{
     public void setTreasureData(List<Treasure> treasureList) {
         //先清除掉已有的marker
         mBaiduMap.clear();
-        Log.e("TAG",treasureList.size()+"");
+        Log.e("TAG", treasureList.size() + "");
 
-        for (Treasure mTreasure:
+        for (Treasure mTreasure :
                 treasureList) {
             Bundle bundle = new Bundle();
-            bundle.putInt("treasure_id",mTreasure.getId());
+            bundle.putInt("treasure_id", mTreasure.getId());
 
             MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.anchor(0.5f,0.5f);
+            markerOptions.anchor(0.5f, 0.5f);
             markerOptions.extraInfo(bundle);
             markerOptions.icon(treasure_dot);
-            markerOptions.position(new LatLng(mTreasure.getLatitude(),mTreasure.getLongitude()));
+            markerOptions.position(new LatLng(mTreasure.getLatitude(), mTreasure.getLongitude()));
             mBaiduMap.addOverlay(markerOptions);
         }
 
+    }
+
+    public static LatLng getLocation() {
+        return mCurrentLocation;
     }
 }
