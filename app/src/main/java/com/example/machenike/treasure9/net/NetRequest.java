@@ -5,6 +5,8 @@ import com.example.machenike.treasure9.login.UserResult;
 import com.example.machenike.treasure9.register.RegisterResult;
 import com.example.machenike.treasure9.treasure.Area;
 import com.example.machenike.treasure9.treasure.Treasure;
+import com.example.machenike.treasure9.treasure.detail.TreasureDetail;
+import com.example.machenike.treasure9.treasure.detail.TreasureDetailResult;
 
 import java.util.List;
 
@@ -31,4 +33,8 @@ public interface NetRequest {
     @POST("/Handler/\n" +
             "TreasureHandler.ashx?action=show")
     Call<List<Treasure>> getTreasure(@Body Area area);
+
+    //获取宝藏详细信息
+    @POST("/Handler/TreasureHandler.ashx?action=tdetails")
+    Call<List<TreasureDetailResult>> getTreasureDetail(@Body TreasureDetail treasureDetail);
 }

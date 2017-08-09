@@ -45,6 +45,7 @@ import com.example.machenike.treasure9.custom.TreasureView;
 import com.example.machenike.treasure9.treasure.Area;
 import com.example.machenike.treasure9.treasure.Treasure;
 import com.example.machenike.treasure9.treasure.TreasureRepo;
+import com.example.machenike.treasure9.treasure.detail.TreasureDetailActivity;
 
 import java.util.List;
 
@@ -162,6 +163,7 @@ public class MapFragment extends Fragment implements MapFragmentView {
                 mCenterLayout.setVisibility(View.VISIBLE);
                 mLayoutBottom.setVisibility(View.GONE);
                 mTreasureView.setVisibility(View.GONE);
+                mBaiduMap.hideInfoWindow();
                 mBtnHideHere.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -376,6 +378,14 @@ public class MapFragment extends Fragment implements MapFragmentView {
                 mBaiduMap.setMapStatus(MapStatusUpdateFactory.zoomOut());
                 break;
         }
+    }
+
+    @OnClick({R.id.treasureView})
+    public void navigateToTreasureDetailActivity(){
+        Bundle bundle = mCurrentMarker.getExtraInfo();
+        int treasure_id = bundle.getInt("treasure_id");
+        Treasure treasure = TreasureRepo.getInstance().getTreasure(treasure_id);
+        TreasureDetailActivity.open(getContext(),treasure);
     }
 
     @Override
