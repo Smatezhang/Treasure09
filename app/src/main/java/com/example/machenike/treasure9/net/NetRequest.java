@@ -7,6 +7,8 @@ import com.example.machenike.treasure9.treasure.Area;
 import com.example.machenike.treasure9.treasure.Treasure;
 import com.example.machenike.treasure9.treasure.detail.TreasureDetail;
 import com.example.machenike.treasure9.treasure.detail.TreasureDetailResult;
+import com.example.machenike.treasure9.treasure.hide.HideTreasure;
+import com.example.machenike.treasure9.treasure.hide.HideTreasureResult;
 
 import java.util.List;
 
@@ -37,4 +39,8 @@ public interface NetRequest {
     //获取宝藏详细信息
     @POST("/Handler/TreasureHandler.ashx?action=tdetails")
     Call<List<TreasureDetailResult>> getTreasureDetail(@Body TreasureDetail treasureDetail);
+
+    //上传宝藏信息
+    @POST("/Handler/TreasureHandler.ashx?action=hide")
+    Call<HideTreasureResult> hideTreasure(@Body HideTreasure hideTreasure);
 }

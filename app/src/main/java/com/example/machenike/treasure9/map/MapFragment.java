@@ -10,6 +10,7 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,6 +53,7 @@ import com.example.machenike.treasure9.treasure.Area;
 import com.example.machenike.treasure9.treasure.Treasure;
 import com.example.machenike.treasure9.treasure.TreasureRepo;
 import com.example.machenike.treasure9.treasure.detail.TreasureDetailActivity;
+import com.example.machenike.treasure9.treasure.hide.HideTreasureActivity;
 
 import java.util.List;
 
@@ -431,6 +433,19 @@ public class MapFragment extends Fragment implements MapFragmentView {
         int treasure_id = bundle.getInt("treasure_id");
         Treasure treasure = TreasureRepo.getInstance().getTreasure(treasure_id);
         TreasureDetailActivity.open(getContext(),treasure);
+    }
+
+    @OnClick({R.id.hide_treasure})
+    public void navigateToHideTreasureActivity(){
+
+        String treasureTitle = mEtTreasureTitle.getText().toString();
+
+        if (TextUtils.isEmpty(treasureTitle)){
+            mActivityUtils.showToast("请输入宝藏标题");
+            return;
+        }
+        LatLng latLng = mBaiduMap.getMapStatus().target;
+        HideTreasureActivity.open(getContext(),treasureTitle,latLng,mGeoCurrentAdress);
     }
 
     @Override
