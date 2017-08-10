@@ -39,6 +39,12 @@ import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.search.core.SearchResult;
+import com.baidu.mapapi.search.geocode.GeoCodeResult;
+import com.baidu.mapapi.search.geocode.GeoCoder;
+import com.baidu.mapapi.search.geocode.OnGetGeoCoderResultListener;
+import com.baidu.mapapi.search.geocode.ReverseGeoCodeOption;
+import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
 import com.example.machenike.treasure9.R;
 import com.example.machenike.treasure9.commons.ActivityUtils;
 import com.example.machenike.treasure9.custom.TreasureView;
@@ -106,6 +112,7 @@ public class MapFragment extends Fragment implements MapFragmentView {
     private BitmapDescriptor treasure_expand;
     private InfoWindow mInfoWindow;
     private static String mCurrentAdressStr;
+    private GeoCoder mGeoCoder;
 
     @Nullable
     @Override
@@ -130,7 +137,36 @@ public class MapFragment extends Fragment implements MapFragmentView {
         initView();
         //初始化位置相关
         initLocation();
+
+        //地理编码相关
+        initGeoCoder();
     }
+
+    private void initGeoCoder() {
+        mGeoCoder = GeoCoder.newInstance();
+        //设置地理编码完成的监听
+        mGeoCoder.setOnGetGeoCodeResultListener(mOnGetGeoCoderResultListener);
+    }
+
+    private String mGeoCurrentAdress;
+    private OnGetGeoCoderResultListener mOnGetGeoCoderResultListener = new OnGetGeoCoderResultListener() {
+        //获取地理编码结果
+        @Override
+        public void onGetGeoCodeResult(GeoCodeResult geoCodeResult) {
+
+        }
+        //获取反地理编码结果
+        @Override
+        public void onGetReverseGeoCodeResult(ReverseGeoCodeResult reverseGeoCodeResult) {
+            if (reverseGeoCodeResult==null||reverseGeoCodeResult.error!=SearchResult.ERRORNO.NO_ERROR){
+                mGeoCurrentAdress = "未知位置";
+                mTvCurrentLocation.setText(mGeoCurrentAdress);
+                return;
+            }
+            mGeoCurrentAdress = reverseGeoCodeResult.getAddress();
+            mTvCurrentLocation.setText(mGeoCurrentAdress);
+        }
+    };
     private static final int TREASURE_MODE_NORMAL = 0;
     private static final int TREASURE_MODE_SELECTED = 1;
     private static final int TREASURE_MODE_HIDE = 2;
@@ -314,6 +350,11 @@ public class MapFragment extends Fragment implements MapFragmentView {
             if (target != mCurrentStatus) {
                 //此时认为地图状态真的改变了
                 updateView(target);
+                if (TREASURE_MODE_CURRENT==TREASURE_MODE_HIDE){
+                    ReverseGeoCodeOption reverseGeoCodeOption = new ReverseGeoCodeOption();
+                    reverseGeoCodeOption.location(target);
+                    mGeoCoder.reverseGeoCode(reverseGeoCodeOption);
+                }
 
                 mCurrentStatus = target;
 
