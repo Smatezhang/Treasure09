@@ -1,8 +1,10 @@
 package com.example.machenike.treasure9.treasure.detail;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
@@ -19,9 +21,14 @@ import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.navi.BaiduMapNavigation;
+import com.baidu.mapapi.navi.NaviParaOption;
+import com.baidu.mapapi.utils.OpenClientUtil;
+import com.example.machenike.treasure9.MainActivity;
 import com.example.machenike.treasure9.R;
 import com.example.machenike.treasure9.commons.ActivityUtils;
 import com.example.machenike.treasure9.custom.TreasureView;
+import com.example.machenike.treasure9.map.MapFragment;
 import com.example.machenike.treasure9.treasure.Treasure;
 
 import java.io.Serializable;
@@ -130,9 +137,78 @@ public class TreasureDetailActivity extends AppCompatActivity implements Treasur
     public void showPupMenu(){
         PopupMenu popupMenu = new PopupMenu(this, mIvNavigation);
         popupMenu.inflate(R.menu.menu_navigation);
+
+        popupMenu.setOnMenuItemClickListener(mOnMenuItemClickListener);
         popupMenu.show();
     }
-//----------------------------实现自视图接口上的方法----------------------------
+
+
+    private PopupMenu.OnMenuItemClickListener mOnMenuItemClickListener = new PopupMenu.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            LatLng startPoint = MapFragment.getLocation();
+            String startAdress = MapFragment.getAdress();
+
+            LatLng endPoint = new LatLng(mTreasure.getLatitude(), mTreasure.getLongitude());
+            String endAdress = mTreasure.getLocation();
+            switch (item.getItemId()){
+                case R.id.walking_navi:
+                    //点击开启步行导航
+                    openWalkingNavi(startPoint,startAdress,endPoint,endAdress);
+                    break;
+                case R.id.biking_navi:
+                    //点击开启骑行导航
+                    openBikingNavi(startPoint,startAdress,endPoint,endAdress);
+                    break;
+            }
+            return false;
+        }
+    };
+
+    private void openBikingNavi(LatLng startPoint, String startAdress, LatLng endPoint, String endAdress) {
+        NaviParaOption naviParaOption = new NaviParaOption()
+                .startName(startAdress)
+                .startPoint(startPoint)
+                .endName(endAdress)
+                .endPoint(endPoint);
+        boolean b = BaiduMapNavigation.openBaiduMapBikeNavi(naviParaOption, this);
+        if (!b){
+            new AlertDialog.Builder(this)
+                    .setTitle("骑行导航")
+                    .setMessage("系统检测到您未安装百度地图或百度地图版本过低，是否下载最新的百度地图？")
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            OpenClientUtil.getLatestBaiduMapApp(TreasureDetailActivity.this);
+                        }
+                    })
+                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .create().show();
+        }
+    }
+
+    //开启步行导航
+    private void openWalkingNavi(LatLng startPoint, String startAdress, LatLng endPoint, String endAdress) {
+        NaviParaOption naviParaOption = new NaviParaOption()
+                .startName(startAdress)
+                .startPoint(startPoint)
+                .endName(endAdress)
+                .endPoint(endPoint);
+
+        boolean b = BaiduMapNavigation.openBaiduMapWalkNavi(naviParaOption, this);
+        if (!b){
+            BaiduMapNavigation.openWebBaiduMapNavi(naviParaOption,this);
+        }
+    }
+
+
+
+    //----------------------------实现自视图接口上的方法----------------------------
     @Override
     public void showMessage(String message) {
         mActivityUtils.showToast(message);

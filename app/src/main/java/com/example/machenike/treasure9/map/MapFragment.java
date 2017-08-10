@@ -105,6 +105,7 @@ public class MapFragment extends Fragment implements MapFragmentView {
     private Marker mCurrentMarker;
     private BitmapDescriptor treasure_expand;
     private InfoWindow mInfoWindow;
+    private static String mCurrentAdressStr;
 
     @Nullable
     @Override
@@ -149,11 +150,13 @@ public class MapFragment extends Fragment implements MapFragmentView {
                 mLayoutBottom.setVisibility(View.GONE);
                 mTreasureView.setVisibility(View.GONE);
                 mCenterLayout.setVisibility(View.INVISIBLE);
+                mHideTreasure.setVisibility(View.GONE);
                 break;
             case TREASURE_MODE_SELECTED://切换到宝藏被选中视图
                 mLayoutBottom.setVisibility(View.VISIBLE);
                 mTreasureView.setVisibility(View.VISIBLE);
                 mCenterLayout.setVisibility(View.INVISIBLE);
+                mHideTreasure.setVisibility(View.GONE);
                 mBaiduMap.showInfoWindow(mInfoWindow);
                 break;
             case TREASURE_MODE_HIDE://切换到埋藏宝藏视图
@@ -207,10 +210,11 @@ public class MapFragment extends Fragment implements MapFragmentView {
             double longitude = bdLocation.getLongitude();//经度
 
             mCurrentLocation = new LatLng(latitude, longitude);
-            String addrStr = bdLocation.getAddrStr();//位置描述
-            Log.e("TAG", "当前位于:" + addrStr + "经纬度是" + longitude + ":" + latitude);
+            //位置描述
+            mCurrentAdressStr = bdLocation.getAddrStr();
+            Log.e("TAG", "当前位于:" + mCurrentAdressStr + "经纬度是" + longitude + ":" + latitude);
 
-            updateView(mCurrentLocation);
+           // updateView(mCurrentLocation);
 
             MyLocationData myLocationData = new MyLocationData.Builder()
                     .accuracy(100f)//精度
@@ -279,7 +283,7 @@ public class MapFragment extends Fragment implements MapFragmentView {
                     changeUiMode(TREASURE_MODE_NORMAL);
                 }
             });
-           // mBaiduMap.showInfoWindow(mInfoWindow);
+            mBaiduMap.showInfoWindow(mInfoWindow);
             Bundle bundle = marker.getExtraInfo();
             int treasure_id = bundle.getInt("treasure_id");
             Treasure treasure = TreasureRepo.getInstance().getTreasure(treasure_id);
@@ -437,4 +441,9 @@ public class MapFragment extends Fragment implements MapFragmentView {
     public static LatLng getLocation() {
         return mCurrentLocation;
     }
+
+    public static String getAdress() {
+        return mCurrentAdressStr;
+    }
+
 }
