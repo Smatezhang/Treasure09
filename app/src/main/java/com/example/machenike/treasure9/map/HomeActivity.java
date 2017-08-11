@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import com.example.machenike.treasure9.MainActivity;
 import com.example.machenike.treasure9.R;
 import com.example.machenike.treasure9.UserPrefs;
+import com.example.machenike.treasure9.account.AccountActivity;
 import com.example.machenike.treasure9.commons.ActivityUtils;
 import com.example.machenike.treasure9.treasure.list.TreasureListFragment;
 import com.squareup.picasso.Picasso;
@@ -70,8 +71,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         mUserIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: 2017/8/3 跳转到个人信息界面
-                mActivityUtils.showToast("跳转到个人信息界面");
+                mActivityUtils.startActivity(AccountActivity.class);
             }
         });
     }
@@ -145,11 +145,15 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private void showTreasureList() {
 
         if (mTreasureListFragment!=null&&mTreasureListFragment.isAdded()){
+            // 将ListFragment弹出回退栈
+            mSupportFragmentManager.popBackStack();
             mSupportFragmentManager.beginTransaction().remove(mTreasureListFragment).commit();
             return;
         }
         mTreasureListFragment = new TreasureListFragment();
-        mSupportFragmentManager.beginTransaction().replace(R.id.fragment_container,mTreasureListFragment).commit();
+        mSupportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container,mTreasureListFragment)
+                .addToBackStack(null).commit();
     }
 
     @Override

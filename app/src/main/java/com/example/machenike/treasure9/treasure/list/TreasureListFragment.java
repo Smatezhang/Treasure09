@@ -34,7 +34,7 @@ public class TreasureListFragment extends Fragment{
         //设置Item之间的间隔
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(),DividerItemDecoration.HORIZONTAL));
         //设置背景
-        mRecyclerView.setBackgroundResource(R.mipmap.scale_bg);
+        mRecyclerView.setBackgroundResource(R.mipmap.screen_bg);
         //设置适配器
         MyAdapter myAdapter = new MyAdapter(TreasureRepo.getInstance().getTreasure());
         myAdapter.setOnItemClickListener(new MyAdapter.OnItemClickListener() {
