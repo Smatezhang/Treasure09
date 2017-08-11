@@ -513,4 +513,11 @@ public class MapFragment extends Fragment implements MapFragmentView {
         return mCurrentAdressStr;
     }
 
+    public boolean isNomalMode(){
+        if (TREASURE_MODE_CURRENT!=TREASURE_MODE_NORMAL){
+            return false;
+        }
+
+        return true;
+    }
 }

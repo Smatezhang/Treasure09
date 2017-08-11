@@ -151,4 +151,17 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         mTreasureListFragment = new TreasureListFragment();
         mSupportFragmentManager.beginTransaction().replace(R.id.fragment_container,mTreasureListFragment).commit();
     }
+
+    @Override
+    public void onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)){
+            mDrawerLayout.closeDrawer(GravityCompat.START);
+            return;
+        }
+        if(mMapFragment.isNomalMode()){
+            super.onBackPressed();
+        }else {
+            mMapFragment.changeUiMode(0);
+        }
+    }
 }

@@ -29,8 +29,16 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder>{
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        Treasure treasure = mTreasureList.get(position);
-        holder.mTreasureView.bindView(treasure);
+        final Treasure treasure = mTreasureList.get(position);
+        TreasureView treasureView = holder.mTreasureView;
+        treasureView.bindView(treasure);
+        treasureView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //回掉接口中的方法
+                mOnItemClickListener.onItemClick(treasure);
+            }
+        });
     }
 
     @Override
@@ -44,5 +52,21 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder>{
             super(itemView);
             mTreasureView = (TreasureView) itemView;
         }
+    }
+
+    //接口回掉第一步：申明一个接口
+
+    interface OnItemClickListener{
+        void onItemClick(Treasure treasure);
+    }
+
+    //接口回掉第二步：申明一个借口类型的成员变量
+
+    private OnItemClickListener mOnItemClickListener;
+
+    //对外提供一个公共的访问方式
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener){
+        mOnItemClickListener = onItemClickListener;
     }
 }
