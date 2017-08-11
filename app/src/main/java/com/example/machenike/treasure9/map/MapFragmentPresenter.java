@@ -29,6 +29,7 @@ public class MapFragmentPresenter {
 
     public void getTreasureInArea(Area area){
         if (TreasureRepo.getInstance().isCached(area)){
+            mMapFragmentView.showTreasure(TreasureRepo.getInstance().getTreasure());
             return;
         }
         mArea = area;

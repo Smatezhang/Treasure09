@@ -135,6 +135,9 @@ public class MapFragment extends Fragment implements MapFragmentView {
         super.onViewCreated(view, savedInstanceState);
         unbinder = ButterKnife.bind(this, view);
         mActivityUtils = new ActivityUtils(this);
+
+        // 清除缓存 : 为了返回到之前的页面重新去请求数据
+        TreasureRepo.getInstance().clear();
         //初始化地图相关
         initView();
         //初始化位置相关
@@ -475,6 +478,10 @@ public class MapFragment extends Fragment implements MapFragmentView {
 
     @Override
     public void setTreasureData(List<Treasure> treasureList) {
+        showOverlay(treasureList);
+    }
+
+    private void showOverlay(List<Treasure> treasureList) {
         //先清除掉已有的marker
         mBaiduMap.clear();
         Log.e("TAG", treasureList.size() + "");
@@ -491,7 +498,11 @@ public class MapFragment extends Fragment implements MapFragmentView {
             markerOptions.position(new LatLng(mTreasure.getLatitude(), mTreasure.getLongitude()));
             mBaiduMap.addOverlay(markerOptions);
         }
+    }
 
+    @Override
+    public void showTreasure(List<Treasure> treasureList) {
+        showOverlay(treasureList);
     }
 
     public static LatLng getLocation() {
