@@ -1,6 +1,9 @@
 package com.example.machenike.treasure9.net;
 
 import com.example.machenike.treasure9.User;
+import com.example.machenike.treasure9.account.Update;
+import com.example.machenike.treasure9.account.UpdateResult;
+import com.example.machenike.treasure9.account.UploadResult;
 import com.example.machenike.treasure9.login.UserResult;
 import com.example.machenike.treasure9.register.RegisterResult;
 import com.example.machenike.treasure9.treasure.Area;
@@ -12,9 +15,13 @@ import com.example.machenike.treasure9.treasure.hide.HideTreasureResult;
 
 import java.util.List;
 
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 
 /**
  * Created by MACHENIKE on 2017/8/2.
@@ -43,4 +50,11 @@ public interface NetRequest {
     //上传宝藏信息
     @POST("/Handler/TreasureHandler.ashx?action=hide")
     Call<HideTreasureResult> hideTreasure(@Body HideTreasure hideTreasure);
+
+    @Multipart
+    @POST("/Handler/UserLoadPicHandler1.ashx")
+    Call<UploadResult> uploadImage(@Part MultipartBody.Part part);
+
+    @POST("/Handler/UserHandler.ashx?action=update")
+    Call<UpdateResult> updateImage(@Body Update update);
 }
